@@ -39,6 +39,8 @@ spec:
           volumeMounts:
             - name: timezone
               mountPath: /etc/localtime
+            - name: volume-db
+                mountPath: /code/db
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           imagePullPolicy: IfNotPresent
@@ -52,6 +54,9 @@ spec:
         - name: timezone
           hostPath:
             path: /usr/share/zoneinfo/Asia/Shanghai
+        - name: volume-db
+            persistentVolumeClaim:
+              claimName: electrs-db
       imagePullSecrets:
         - name: regcred
       affinity: {}
