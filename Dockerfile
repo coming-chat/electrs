@@ -7,7 +7,7 @@ WORKDIR /code
 COPY ./ ./
 RUN cargo build --release
 
-FROM alpine:latest
+FROM ubuntu:latest
 WORKDIR /code
 COPY --from=builder /code/target/release/electrs /usr/local/bin
 COPY ./run .
