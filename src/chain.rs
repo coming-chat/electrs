@@ -186,6 +186,28 @@ impl From<&str> for Network {
     }
 }
 
+impl From<Network> for &str {
+    fn from(n: Network) -> Self {
+        match n {
+            #[cfg(not(feature = "liquid"))]
+            Network::Bitcoin => "mainnet",
+            #[cfg(not(feature = "liquid"))]
+            Network::Testnet => "testnet",
+            #[cfg(not(feature = "liquid"))]
+            Network::Regtest => "regtest",
+            #[cfg(not(feature = "liquid"))]
+            Network::Signet => "signet",
+
+            #[cfg(feature = "liquid")]
+            Network::Liquid => "liquid",
+            #[cfg(feature = "liquid")]
+            Network::LiquidTestnet => "liquidtestnet",
+            #[cfg(feature = "liquid")]
+            Network::LiquidRegtest => "liquidregtest",
+        }
+    }
+}
+
 #[cfg(not(feature = "liquid"))]
 impl From<Network> for BNetwork {
     fn from(network: Network) -> Self {

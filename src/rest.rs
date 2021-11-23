@@ -29,6 +29,8 @@ use {
     },
 };
 
+use light_bitcoin::mast::generate_btc_address;
+use musig2::PublicKey;
 use serde::Serialize;
 use serde_json;
 use std::collections::HashMap;
@@ -52,6 +54,18 @@ const TTL_LONG: u32 = 157_784_630; // ttl for static resources (5 years)
 const TTL_SHORT: u32 = 10; // ttl for volatie resources
 const TTL_MEMPOOL_RECENT: u32 = 5; // ttl for GET /mempool/recent
 const CONF_FINAL: usize = 10; // reorgs deeper than this are considered unlikely
+
+fn pubkey_to_address(pubkey: &str, network: &str) -> Result<String, HttpError> {
+    let pubkey: Vec<u8> =
+        hex::decode(pubkey).map_err(|_| HttpError::from("Invalid Public".to_owned()))?;
+
+    if pubkey.len() != 65 {
+        return Err(HttpError::from("Invalid Public".to_owned()));
+    }
+    let pubkey = PublicKey::parse_slice(&pubkey)
+        .map_err(|_| HttpError::from("Invalid Public".to_owned()))?;
+    generate_btc_address(&pubkey, network).map_err(|_| HttpError::from("Invalid Public".to_owned()))
+}
 
 #[derive(Serialize, Deserialize)]
 struct BlockValue {
@@ -767,8 +781,18 @@ fn handle_request(
 
             json_response(prepare_txs(txs, query, config), ttl)
         }
-        (&Method::GET, Some(script_type @ &"address"), Some(script_str), None, None, None)
+        (&Method::GET, Some(script_type @ &"pubkey"), Some(script_str), None, None, None)
+        | (&Method::GET, Some(script_type @ &"address"), Some(script_str), None, None, None)
         | (&Method::GET, Some(script_type @ &"scripthash"), Some(script_str), None, None, None) => {
+            let (script_type, script_str) = if script_type == &"pubkey" {
+                (
+                    &"address",
+                    pubkey_to_address(script_str, config.network_type.into())?,
+                )
+            } else {
+                (script_type, (*script_str).to_owned())
+            };
+            let script_str = &script_str.as_str();
             let script_hash = to_scripthash(script_type, script_str, config.network_type)?;
             let stats = query.stats(&script_hash[..]);
             json_response(
