@@ -28,7 +28,7 @@ spec:
               protocol: TCP
           envFrom:
             - configMapRef:
-                name: electrs
+                name: electrs-env
           resources:
             limits:
               cpu: 500m
