@@ -378,6 +378,7 @@ struct UtxoValue {
     txid: Txid,
     vout: u32,
     status: TransactionStatus,
+    rawtx: String,
 
     #[cfg(not(feature = "liquid"))]
     value: u64,
@@ -421,6 +422,7 @@ impl From<Utxo> for UtxoValue {
             vout: utxo.vout,
             status: TransactionStatus::from(utxo.confirmed),
 
+            rawtx: "".to_string(),
             #[cfg(not(feature = "liquid"))]
             value: utxo.value,
 
@@ -926,6 +928,13 @@ fn handle_request(
                 .map(UtxoValue::from)
                 .collect();
             // XXX paging?
+            for utxo in utxos.iter() {
+                let hash = Txid::from_hex(&*utxo.txid.to_string())?;
+                let rawtx = query
+                    .lookup_raw_txn(&hash)
+                    .ok_or_else(|| HttpError::not_found("Transaction not found".to_string()))?;
+                let rawtx_hex = hex::encode(rawtx);
+            }
             json_response(utxos, TTL_SHORT)
         }
         (&Method::GET, Some(&"address-prefix"), Some(prefix), None, None, None) => {

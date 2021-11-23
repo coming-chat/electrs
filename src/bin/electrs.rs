@@ -54,14 +54,14 @@ fn run_server(config: Arc<Config>) -> Result<()> {
         &metrics,
     )?);
     let store = Arc::new(Store::open(&config.db_path.join("newindex"), &config));
-    let mut indexer = Indexer::open(
-        Arc::clone(&store),
-        fetch_from(&config, &store),
-        &config,
-        &metrics,
-    );
-    let mut tip = indexer.update(&daemon)?;
-
+    // let mut indexer = Indexer::open(
+    //     Arc::clone(&store),
+    //     fetch_from(&config, &store),
+    //     &config,
+    //     &metrics,
+    // );
+    // let mut tip = indexer.update(&daemon)?;
+    //
     let chain = Arc::new(ChainQuery::new(
         Arc::clone(&store),
         Arc::clone(&daemon),
@@ -80,7 +80,7 @@ fn run_server(config: Arc<Config>) -> Result<()> {
         &metrics,
         Arc::clone(&config),
     )));
-    mempool.write().unwrap().update(&daemon)?;
+    // mempool.write().unwrap().update(&daemon)?;
 
     #[cfg(feature = "liquid")]
     let asset_db = config.asset_db_path.as_ref().map(|db_dir| {
@@ -112,10 +112,10 @@ fn run_server(config: Arc<Config>) -> Result<()> {
 
         // Index new blocks
         let current_tip = daemon.getbestblockhash()?;
-        if current_tip != tip {
-            indexer.update(&daemon)?;
-            tip = current_tip;
-        };
+        // if current_tip != tip {
+        //     indexer.update(&daemon)?;
+        //     tip = current_tip;
+        // };
 
         // Update mempool
         mempool.write().unwrap().update(&daemon)?;
