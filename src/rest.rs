@@ -922,18 +922,18 @@ fn handle_request(
             None,
         ) => {
             let script_hash = to_scripthash(script_type, script_str, config.network_type)?;
-            let utxos: Vec<UtxoValue> = query
+            let mut utxos: Vec<UtxoValue> = query
                 .utxo(&script_hash[..])?
                 .into_iter()
                 .map(UtxoValue::from)
                 .collect();
             // XXX paging?
-            for utxo in utxos.iter() {
+            for utxo in utxos.iter_mut() {
                 let hash = Txid::from_hex(&*utxo.txid.to_string())?;
                 let rawtx = query
                     .lookup_raw_txn(&hash)
                     .ok_or_else(|| HttpError::not_found("Transaction not found".to_string()))?;
-                let rawtx_hex = hex::encode(rawtx);
+                utxo.rawtx = String::from(hex::encode(rawtx));
             }
             json_response(utxos, TTL_SHORT)
         }
