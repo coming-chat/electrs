@@ -55,8 +55,8 @@ spec:
           hostPath:
             path: /usr/share/zoneinfo/Asia/Shanghai
         - name: volume-db
-            persistentVolumeClaim:
-              claimName: electrs-db
+          persistentVolumeClaim:
+            claimName: electrs-db
       imagePullSecrets:
         - name: regcred
       affinity: {}
