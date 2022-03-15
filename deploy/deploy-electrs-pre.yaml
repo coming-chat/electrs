@@ -102,7 +102,7 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        app: electrs
+        app: electrs-mainnet
     spec:
       containers:
         - name: container-electrs-mainnet-pre
@@ -116,7 +116,7 @@ spec:
               protocol: TCP
           envFrom:
             - configMapRef:
-                name: electrs-env
+                name: electrs-mainnet-env
           resources:
             limits:
               cpu: 500m
@@ -158,10 +158,10 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: electrs-svc
+  name: electrs-mainnet-svc
   namespace: pre
   labels:
-    app: electrs-svc
+    app: electrs-mainnet-svc
 spec:
   ports:
     - port: 3003
@@ -169,6 +169,6 @@ spec:
     - port: 4224
       name: monitor
   selector:
-    app: electrs
+    app: electrs-mainnet
 status:
   loadBalancer: {}
