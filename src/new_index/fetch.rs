@@ -83,6 +83,12 @@ fn bitcoind_fetcher(
                     .getblocks(&blockhashes)
                     .expect("failed to get blocks from bitcoind");
                 assert_eq!(blocks.len(), entries.len());
+                for block in blocks.iter() {
+                    match block.bip34_block_height() {
+                        Ok(number) => println!("get block number: {}", number),
+                        Err(err) => println!("err: {}", err)
+                    };
+                }
                 let block_entries: Vec<BlockEntry> = blocks
                     .into_iter()
                     .zip(entries)
