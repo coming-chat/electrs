@@ -117,13 +117,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: electrs-mainnet-env
-          resources:
-            limits:
-              cpu: 500m
-              memory: 4Gi
-            requests:
-              cpu: 500m
-              memory: 2Gi
           volumeMounts:
             - name: timezone
               mountPath: /etc/localtime
