@@ -294,8 +294,10 @@ impl Mempool {
             }
         };
         // Add new transactions
+        println!("Add new transactions");
         self.add(to_add);
         // Remove missing transactions
+        println!("Remove missing transactions");
         self.remove(to_remove);
 
         self.count
@@ -310,7 +312,7 @@ impl Mempool {
                 .start_timer();
             self.backlog_stats = (BacklogStats::new(&self.feeinfo), Instant::now());
         }
-
+        println!("update success");
         Ok(())
     }
 
