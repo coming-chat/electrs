@@ -1,3 +1,3 @@
 #!/bin/bash
 
-/usr/local/bin/electrs -v --timestamp --jsonrpc-import --http-addr "${HTTP_ADDR}" --daemon-rpc-addr "${DAEMON_RPC_ADDR}" --cookie "${COOKIE}" --network "${NETWORK}"
+/usr/local/bin/electrs -vvvv --timestamp --jsonrpc-import --http-addr "${HTTP_ADDR}" --daemon-rpc-addr "${DAEMON_RPC_ADDR}" --cookie "${COOKIE}" --network "${NETWORK}"

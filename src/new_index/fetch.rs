@@ -84,7 +84,7 @@ fn bitcoind_fetcher(
                     .getblocks(&blockhashes)
                     .expect("failed to get blocks from bitcoind");
                 assert_eq!(blocks.len(), entries.len());
-                for block in blocks.iter() {
+                if let Some(block) =blocks.last(){
                     match block.bip34_block_height() {
                         Ok(number) => info!("get block number: {}", number),
                         Err(err) => error!("err: {}", err)
