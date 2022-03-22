@@ -268,10 +268,10 @@ impl Indexer {
             to_add.len(),
             self.from
         );
-        println!("start to_add sync");
+        info!("start to_add sync");
         start_fetcher(self.from, &daemon, to_add)?.map(|blocks| self.add(&blocks));
         self.start_auto_compactions(&self.store.txstore_db);
-        println!("finish to_add");
+        info!("finish to_add");
 
         let to_index = self.headers_to_index(&new_headers);
         debug!(
@@ -279,10 +279,10 @@ impl Indexer {
             to_index.len(),
             self.from
         );
-        println!("start to_index sync");
+        info!("start to_index sync");
         start_fetcher(self.from, &daemon, to_index)?.map(|blocks| self.index(&blocks));
         self.start_auto_compactions(&self.store.history_db);
-        println!("finish to_index");
+        info!("finish to_index");
 
         if let DBFlush::Disable = self.flush {
             debug!("flushing to disk");

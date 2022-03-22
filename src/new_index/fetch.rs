@@ -77,7 +77,7 @@ fn bitcoind_fetcher(
     Ok(Fetcher::from(
         chan.into_receiver(),
         spawn_thread("bitcoind_fetcher", move || {
-            println!("new_headers lens {}", new_headers.len());
+            info!("new_headers lens {}", new_headers.len());
             for entries in new_headers.chunks(1000) {
                 let blockhashes: Vec<BlockHash> = entries.iter().map(|e| *e.hash()).collect();
                 let blocks = daemon
@@ -86,8 +86,8 @@ fn bitcoind_fetcher(
                 assert_eq!(blocks.len(), entries.len());
                 for block in blocks.iter() {
                     match block.bip34_block_height() {
-                        Ok(number) => println!("get block number: {}", number),
-                        Err(err) => println!("err: {}", err)
+                        Ok(number) => info!("get block number: {}", number),
+                        Err(err) => error!("err: {}", err)
                     };
                 }
                 let block_entries: Vec<BlockEntry> = blocks
@@ -104,7 +104,7 @@ fn bitcoind_fetcher(
                     .send(block_entries)
                     .expect("failed to send fetched blocks");
             }
-            println!("sync block finish!")
+            info!("sync block finish!")
         }),
     ))
 }
