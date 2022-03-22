@@ -87,7 +87,7 @@ fn bitcoind_fetcher(
                 if let Some(block) =blocks.last(){
                     match block.bip34_block_height() {
                         Ok(number) => info!("get block number: {}", number),
-                        Err(err) => error!("err: {}", err)
+                        Err(_) => info!("block hash: {}", block.header.block_hash())
                     };
                 }
                 let block_entries: Vec<BlockEntry> = blocks
