@@ -1113,20 +1113,20 @@ fn handle_request(
         ) => {
             let pubkeys_bytes = hex::decode(pubkeys)?;
             let threshold = threshold.parse::<u32>()?;
-            if pubkeys_bytes.len() % 65 != 0 {
+            if pubkeys_bytes.len() % 33 != 0 {
                 return http_message(
                     StatusCode::BAD_REQUEST,
                     "Invalid pubkey length".to_string(),
                     0,
                 );
             }
-            let pubkeys_count = pubkeys_bytes.len() / 65;
+            let pubkeys_count = pubkeys_bytes.len() / 33;
 
             let mut pubkeys = Vec::new();
             for n in 0..pubkeys_count {
-                let mut keys = [0u8; 65];
-                keys.copy_from_slice(&pubkeys_bytes[n * 65..n * 65 + 65]);
-                let publickey = musig2::PublicKey::parse(&keys)
+                let mut keys = [0u8; 33];
+                keys.copy_from_slice(&pubkeys_bytes[n * 33..n * 33 + 33]);
+                let publickey = musig2::PublicKey::parse_slice(&keys)
                     .map_err(|_| HttpError::from("Invalid public key".to_string()))?;
                 pubkeys.push(publickey);
             }
@@ -1142,7 +1142,7 @@ fn handle_request(
         // generate btc address
         (&Method::GET, Some(&"btc"), Some(&"address"), Some(pubkey), Some(network), None) => {
             let pubkey = hex::decode(pubkey)?;
-            if pubkey.len() != 65 {
+            if pubkey.len() != 33 {
                 return http_message(
                     StatusCode::BAD_REQUEST,
                     "Invalid pubkey length".to_string(),
