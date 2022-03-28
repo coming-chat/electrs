@@ -16,6 +16,9 @@ use bitcoin::hashes::Error as HashError;
 use hex::{self, FromHexError};
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Method, Response, Server, StatusCode};
+use light_bitcoin::chain::{Bytes, ConstructTransaction};
+use light_bitcoin::mast::Mast;
+use light_bitcoin::serialization::{serialize_with_flags, SERIALIZE_TRANSACTION_WITNESS};
 use tokio::sync::oneshot;
 
 use hyperlocal::UnixServerExt;
@@ -1079,6 +1082,78 @@ fn handle_request(
 
         (&Method::GET, Some(&"fee-estimates"), None, None, None, None) => {
             json_response(query.estimate_fee_map(), TTL_SHORT)
+        }
+
+        (&Method::GET, Some(&"unsigned"), Some(&"tx"), Some(tx), None, None) => {
+            let mut base_tx: light_bitcoin::chain::Transaction =
+                match tx.parse::<ConstructTransaction>() {
+                    Ok(d) => d.cur_transaction,
+                    Err(_) => tx
+                        .parse::<light_bitcoin::chain::Transaction>()
+                        .map_err(|_| HttpError::from("Invalid transaction".to_string()))?,
+                };
+            for i in 0..base_tx.inputs.len() {
+                base_tx.inputs[i].script_sig = Bytes::new();
+                base_tx.inputs[i].script_witness = vec![];
+            }
+            let tx_hex = hex::encode(serialize_with_flags(
+                &base_tx,
+                SERIALIZE_TRANSACTION_WITNESS,
+            ));
+            http_message(StatusCode::OK, tx_hex, TTL_SHORT)
+        }
+
+        (
+            &Method::GET,
+            Some(&"threshold"),
+            Some(&"pubkey"),
+            Some(pubkeys),
+            Some(threshold),
+            None,
+        ) => {
+            let pubkeys_bytes = hex::decode(pubkeys)?;
+            let threshold = threshold.parse::<u32>()?;
+            if pubkeys_bytes.len() % 65 != 0 {
+                return http_message(
+                    StatusCode::BAD_REQUEST,
+                    "Invalid pubkey length".to_string(),
+                    0,
+                );
+            }
+            let pubkeys_count = pubkeys_bytes.len() / 65;
+
+            let mut pubkeys = Vec::new();
+            for n in 0..pubkeys_count {
+                let mut keys = [0u8; 65];
+                keys.copy_from_slice(&pubkeys_bytes[n * 65..n * 65 + 65]);
+                let publickey = musig2::PublicKey::parse(&keys)
+                    .map_err(|_| HttpError::from("Invalid public key".to_string()))?;
+                pubkeys.push(publickey);
+            }
+            let mast = Mast::new(pubkeys, threshold)
+                .map_err(|_| HttpError::from("Invalid pubkeys or threshold".to_string()))?;
+            let tweak = mast
+                .generate_tweak_pubkey()
+                .map_err(|_| HttpError::from("Failed to generate tweak".to_string()))?;
+            let tweak_hex = hex::encode(tweak.serialize());
+            http_message(StatusCode::OK, tweak_hex, TTL_SHORT)
+        }
+
+        // generate btc address
+        (&Method::GET, Some(&"btc"), Some(&"address"), Some(pubkey), Some(network), None) => {
+            let pubkey = hex::decode(pubkey)?;
+            if pubkey.len() != 65 {
+                return http_message(
+                    StatusCode::BAD_REQUEST,
+                    "Invalid pubkey length".to_string(),
+                    0,
+                );
+            }
+            let pubkey = musig2::PublicKey::parse_slice(&pubkey)
+                .map_err(|_| HttpError::from("Invalid public key".to_string()))?;
+            let address = light_bitcoin::mast::generate_btc_address(&pubkey, network)
+                .map_err(|_| HttpError::from("Failed to generate address".to_string()))?;
+            http_message(StatusCode::OK, address, TTL_SHORT)
         }
 
         #[cfg(feature = "liquid")]

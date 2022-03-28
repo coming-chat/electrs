@@ -59,6 +59,7 @@ tokio = { version = "1", features = ["sync", "macros"] }
 # optional dependencies for electrum-discovery
 electrum-client = { version = "0.8", optional = true }
 
+# coming bot rpc
 light-bitcoin = { git = "https://github.com/chainx-org/light-bitcoin", branch = "taproot" }
 musig2 = { git = "https://github.com/chainx-org/Musig2", branch = "lib" }
 
