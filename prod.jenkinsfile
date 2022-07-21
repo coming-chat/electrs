@@ -9,7 +9,12 @@ pipeline {
     KUBECONFIG_CREDENTIAL_ID = 'admin'
     REGISTRY = 'docker.io'
     DOCKERHUB_NAMESPACE = 'comingweb3'
-    APP_NAME = 'electrs-prod'
+    TAG_NAME = sh (returnStdout: true, script: "echo $BRANCH_NAME | sed 's@/@-@g'").trim()
+    APP_NAME_SIGNET = 'electrs-signet'
+    APP_NAME_MAINNET = 'electrs-mainnet'
+    NAME_SPACE = 'backend-prod'
+    REPLICAS = 1
+    HOST_NAME = 'electrs.coming.chat'
   }
 
 
@@ -27,7 +32,7 @@ pipeline {
         container('base') {
           withCredentials([usernamePassword(credentialsId : "$DOCKER_CREDENTIAL_ID" ,passwordVariable : 'DOCKER_PASSWORD' ,usernameVariable : 'DOCKER_USERNAME' ,)]) {
             sh 'echo "$DOCKER_PASSWORD" | docker login $REGISTRY -u "$DOCKER_USERNAME" --password-stdin'
-            sh 'docker build -f Dockerfile -t $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:$BUILD_NUMBER .'
+            sh 'docker build --network host -f Dockerfile -t $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:$TAG_NAME-$BUILD_NUMBER  .'
             sh 'docker push $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:$BUILD_NUMBER'
           }
 
@@ -46,7 +51,9 @@ pipeline {
                 variable: 'KUBECONFIG')
               ])
               {
-                sh 'envsubst <  deploy/deploy-electrs-prod.yaml | kubectl apply -f -'
+                sh 'envsubst <  deploy/deploy-electrs-mainnet.yaml | kubectl apply -f -'
+                sh 'envsubst <  deploy/deploy-electrs-signet.yaml | kubectl apply -f -'
+                sh 'envsubst <  deploy/ingress.yaml | kubectl apply -f -'
               }
             }
 

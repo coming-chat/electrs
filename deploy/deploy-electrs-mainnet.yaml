@@ -1,0 +1,96 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: $APP_NAME_MAINNET
+  namespace: $NAME_SPACE
+  labels:
+    app: $APP_NAME_MAINNET
+spec:
+  replicas: $APP_NAME_MAINNET
+  selector:
+    matchLabels:
+      app: $APP_NAME_MAINNET
+  template:
+    metadata:
+      labels:
+        app: $APP_NAME_MAINNET
+    spec:
+      volumes:
+        - name: timezone
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+      containers:
+        - name: $APP_NAME_MAINNET
+          image: $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:$TAG_NAME-$BUILD_NUMBER
+          ports:
+            - name: http
+              containerPort: 3003
+              protocol: TCP
+            - name: monitor
+              containerPort: 4224
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: $APP_NAME_MAINNET-env
+          resources:
+            limits:
+              cpu: 500m
+              memory: 4Gi
+            requests:
+              cpu: 500m
+              memory: 2Gi
+          volumeMounts:
+            - name: timezone
+              mountPath: /etc/localtime
+            - name: data
+              mountPath: /code/db
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: default
+      securityContext: {}
+      imagePullSecrets:
+        - name: comingweb3-registry-secret
+      affinity: {}
+      schedulerName: default-scheduler
+  volumeClaimTemplates:
+    - kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: data
+        labels:
+          app: $APP_NAME_MAINNET
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        volumeMode: Filesystem
+  revisionHistoryLimit: 10
+  serviceName: $APP_NAME_MAINNET-svc
+  podManagementPolicy: OrderedReady
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: $APP_NAME_MAINNET-svc
+  namespace: $NAME_SPACE
+  labels:
+    app: $APP_NAME_MAINNET-svc
+spec:
+  ports:
+    - port: 3003
+      name: http
+      targetPort: http
+    - port: 4224
+      name: monitor
+      targetPort: monitor
+  selector:
+    app: $APP_NAME_MAINNET
+  type: ClusterIP
+
+
+
