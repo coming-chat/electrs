@@ -33,7 +33,7 @@ use {
 };
 
 use light_bitcoin::mast::generate_btc_address;
-use musig2::key::PublicKey;
+use light_bitcoin::mast::key::PublicKey;
 use serde::Serialize;
 use serde_json;
 use std::collections::HashMap;
@@ -1119,7 +1119,7 @@ fn handle_request(
                 .map(|p| {
                     let pubkey = hex::decode(p)
                         .map_err(|_| HttpError::from("Invalid pubkey".to_string()))?;
-                    musig2::PublicKey::parse_slice(&pubkey)
+                    light_bitcoin::mast::key::PublicKey::parse_slice(&pubkey)
                         .map_err(|_| HttpError::from("Invalid public key".to_string()))
                 })
                 .collect::<Result<_, _>>()?;
@@ -1136,7 +1136,7 @@ fn handle_request(
         // generate btc address
         (&Method::GET, Some(&"btc"), Some(&"address"), Some(pubkey), Some(network), None) => {
             let pubkey = hex::decode(pubkey)?;
-            let pubkey = musig2::PublicKey::parse_slice(&pubkey)
+            let pubkey = light_bitcoin::mast::key::PublicKey::parse_slice(&pubkey)
                 .map_err(|_| HttpError::from("Invalid public key".to_string()))?;
             let address = light_bitcoin::mast::generate_btc_address(&pubkey, network)
                 .map_err(|_| HttpError::from("Failed to generate address".to_string()))?;

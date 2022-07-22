@@ -190,9 +190,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitvec"
-version = "0.20.4"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7774144344a4faa177370406a7ff5f1da24303817368584c6206c8303eb07848"
+checksum = "1bc2832c24239b0141d5674bb9174f9d68a8b5b3f2753311927c172ca46f7e9c"
 dependencies = [
  "funty",
  "radium",
@@ -472,7 +472,6 @@ dependencies = [
  "libc",
  "light-bitcoin",
  "log",
- "musig2",
  "num_cpus",
  "page_size",
  "prometheus",
@@ -595,9 +594,9 @@ checksum = "a06f77d526c1a601b7c4cdd98f54b5eaabffc14d5f2f0296febdc7f357c6d3ba"
 
 [[package]]
 name = "funty"
-version = "1.1.0"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fed34cd105917e91daa4da6b3728c47b068749d6a62c59811f06ed2ac71d9da7"
+checksum = "e6d5a32815ae3f33302d95fdcb2ce17862f8c65363dcfd29360480ba1001fc9c"
 
 [[package]]
 name = "futures-channel"
@@ -803,9 +802,9 @@ dependencies = [
 
 [[package]]
 name = "impl-codec"
-version = "0.5.1"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "161ebdfec3c8e3b52bf61c4f3550a1eea4f9579d10dc1b936f3171ebdcd6c443"
+checksum = "ba6a270039626615617f3f36d15fc827041df3b78c439da2cadfa47455a77f2f"
 dependencies = [
  "parity-scale-codec",
 ]
@@ -925,7 +924,7 @@ dependencies = [
 [[package]]
 name = "libsecp256k1"
 version = "0.7.0"
-source = "git+https://github.com/chainx-org/libsecp256k1.git#b208f8a32831de8c48d15ed9e90ed807f3fe2275"
+source = "git+https://github.com/chainx-org/libsecp256k1?branch=develop-2022#7dc70232c6d8e1d3a746c1eaeb701410b61609c2"
 dependencies = [
  "arrayref",
  "base64 0.13.0",
@@ -943,7 +942,7 @@ dependencies = [
 [[package]]
 name = "libsecp256k1-core"
 version = "0.3.0"
-source = "git+https://github.com/chainx-org/libsecp256k1.git#b208f8a32831de8c48d15ed9e90ed807f3fe2275"
+source = "git+https://github.com/chainx-org/libsecp256k1?branch=develop-2022#7dc70232c6d8e1d3a746c1eaeb701410b61609c2"
 dependencies = [
  "crunchy",
  "digest",
@@ -955,7 +954,7 @@ dependencies = [
 [[package]]
 name = "libsecp256k1-gen-ecmult"
 version = "0.3.0"
-source = "git+https://github.com/chainx-org/libsecp256k1.git#b208f8a32831de8c48d15ed9e90ed807f3fe2275"
+source = "git+https://github.com/chainx-org/libsecp256k1?branch=develop-2022#7dc70232c6d8e1d3a746c1eaeb701410b61609c2"
 dependencies = [
  "libsecp256k1-core",
 ]
@@ -963,7 +962,7 @@ dependencies = [
 [[package]]
 name = "libsecp256k1-gen-genmult"
 version = "0.3.0"
-source = "git+https://github.com/chainx-org/libsecp256k1.git#b208f8a32831de8c48d15ed9e90ed807f3fe2275"
+source = "git+https://github.com/chainx-org/libsecp256k1?branch=develop-2022#7dc70232c6d8e1d3a746c1eaeb701410b61609c2"
 dependencies = [
  "libsecp256k1-core",
 ]
@@ -971,7 +970,7 @@ dependencies = [
 [[package]]
 name = "light-bitcoin"
 version = "0.2.0"
-source = "git+https://github.com/chainx-org/light-bitcoin?branch=taproot#3910a0aab7acbc37ce0bf5107900f60ad389b983"
+source = "git+https://github.com/chainx-org/light-bitcoin?branch=develop-2022#d19589e588cf9a520caf04194a3a5bd48de9fc39"
 dependencies = [
  "light-bitcoin-chain",
  "light-bitcoin-crypto",
@@ -986,7 +985,7 @@ dependencies = [
 [[package]]
 name = "light-bitcoin-chain"
 version = "0.2.0"
-source = "git+https://github.com/chainx-org/light-bitcoin?branch=taproot#3910a0aab7acbc37ce0bf5107900f60ad389b983"
+source = "git+https://github.com/chainx-org/light-bitcoin?branch=develop-2022#d19589e588cf9a520caf04194a3a5bd48de9fc39"
 dependencies = [
  "hex",
  "light-bitcoin-crypto",
@@ -999,7 +998,7 @@ dependencies = [
 [[package]]
 name = "light-bitcoin-crypto"
 version = "0.2.0"
-source = "git+https://github.com/chainx-org/light-bitcoin?branch=taproot#3910a0aab7acbc37ce0bf5107900f60ad389b983"
+source = "git+https://github.com/chainx-org/light-bitcoin?branch=develop-2022#d19589e588cf9a520caf04194a3a5bd48de9fc39"
 dependencies = [
  "digest",
  "light-bitcoin-primitives",
@@ -1012,7 +1011,7 @@ dependencies = [
 [[package]]
 name = "light-bitcoin-keys"
 version = "0.2.0"
-source = "git+https://github.com/chainx-org/light-bitcoin?branch=taproot#3910a0aab7acbc37ce0bf5107900f60ad389b983"
+source = "git+https://github.com/chainx-org/light-bitcoin?branch=develop-2022#d19589e588cf9a520caf04194a3a5bd48de9fc39"
 dependencies = [
  "arrayref",
  "bitcoin-bech32",
@@ -1023,7 +1022,6 @@ dependencies = [
  "light-bitcoin-crypto",
  "light-bitcoin-primitives",
  "light-bitcoin-serialization",
- "musig2",
  "parity-scale-codec",
  "scale-info",
  "sha2",
@@ -1032,7 +1030,7 @@ dependencies = [
 [[package]]
 name = "light-bitcoin-mast"
 version = "0.2.0"
-source = "git+https://github.com/chainx-org/light-bitcoin?branch=taproot#3910a0aab7acbc37ce0bf5107900f60ad389b983"
+source = "git+https://github.com/chainx-org/light-bitcoin?branch=develop-2022#d19589e588cf9a520caf04194a3a5bd48de9fc39"
 dependencies = [
  "arrayref",
  "bitcoin-bech32",
@@ -1040,11 +1038,14 @@ dependencies = [
  "core2",
  "digest",
  "hex",
+ "lazy_static",
+ "libsecp256k1",
+ "light-bitcoin-crypto",
  "light-bitcoin-keys",
  "light-bitcoin-script",
  "light-bitcoin-serialization",
- "musig2",
  "parity-scale-codec",
+ "rand_core 0.6.3",
  "scale-info",
  "sha2",
 ]
@@ -1052,7 +1053,7 @@ dependencies = [
 [[package]]
 name = "light-bitcoin-merkle"
 version = "0.2.0"
-source = "git+https://github.com/chainx-org/light-bitcoin?branch=taproot#3910a0aab7acbc37ce0bf5107900f60ad389b983"
+source = "git+https://github.com/chainx-org/light-bitcoin?branch=develop-2022#d19589e588cf9a520caf04194a3a5bd48de9fc39"
 dependencies = [
  "light-bitcoin-chain",
  "light-bitcoin-primitives",
@@ -1064,7 +1065,7 @@ dependencies = [
 [[package]]
 name = "light-bitcoin-primitives"
 version = "0.2.0"
-source = "git+https://github.com/chainx-org/light-bitcoin?branch=taproot#3910a0aab7acbc37ce0bf5107900f60ad389b983"
+source = "git+https://github.com/chainx-org/light-bitcoin?branch=develop-2022#d19589e588cf9a520caf04194a3a5bd48de9fc39"
 dependencies = [
  "byteorder",
  "fixed-hash",
@@ -1078,7 +1079,7 @@ dependencies = [
 [[package]]
 name = "light-bitcoin-script"
 version = "0.2.0"
-source = "git+https://github.com/chainx-org/light-bitcoin?branch=taproot#3910a0aab7acbc37ce0bf5107900f60ad389b983"
+source = "git+https://github.com/chainx-org/light-bitcoin?branch=develop-2022#d19589e588cf9a520caf04194a3a5bd48de9fc39"
 dependencies = [
  "hex",
  "libsecp256k1",
@@ -1095,7 +1096,7 @@ dependencies = [
 [[package]]
 name = "light-bitcoin-serialization"
 version = "0.2.0"
-source = "git+https://github.com/chainx-org/light-bitcoin?branch=taproot#3910a0aab7acbc37ce0bf5107900f60ad389b983"
+source = "git+https://github.com/chainx-org/light-bitcoin?branch=develop-2022#d19589e588cf9a520caf04194a3a5bd48de9fc39"
 dependencies = [
  "light-bitcoin-primitives",
  "light-bitcoin-serialization-derive",
@@ -1106,7 +1107,7 @@ dependencies = [
 [[package]]
 name = "light-bitcoin-serialization-derive"
 version = "0.2.0"
-source = "git+https://github.com/chainx-org/light-bitcoin?branch=taproot#3910a0aab7acbc37ce0bf5107900f60ad389b983"
+source = "git+https://github.com/chainx-org/light-bitcoin?branch=develop-2022#d19589e588cf9a520caf04194a3a5bd48de9fc39"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1178,24 +1179,6 @@ dependencies = [
  "log",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys",
-]
-
-[[package]]
-name = "musig2"
-version = "0.1.0"
-source = "git+ssh://git@github.com/chainx-org/Musig2?branch=lib#534677da2f947bd1ced385d35bcfa3cb7f1f7e8b"
-dependencies = [
- "arrayref",
- "digest",
- "hex",
- "lazy_static",
- "libsecp256k1",
- "log",
- "parity-scale-codec",
- "rand 0.8.5",
- "rand_core 0.6.3",
- "scale-info",
- "sha2",
 ]
 
 [[package]]
@@ -1288,9 +1271,9 @@ dependencies = [
 
 [[package]]
 name = "parity-scale-codec"
-version = "2.3.1"
+version = "3.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "373b1a4c1338d9cd3d1fa53b3a11bdab5ab6bd80a20f7f7becd76953ae2be909"
+checksum = "9182e4a71cae089267ab03e67c99368db7cd877baf50f931e5d6d4b71e195ac0"
 dependencies = [
  "arrayvec",
  "bitvec",
@@ -1302,9 +1285,9 @@ dependencies = [
 
 [[package]]
 name = "parity-scale-codec-derive"
-version = "2.3.1"
+version = "3.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1557010476e0595c9b568d16dcfb81b93cdeb157612726f5170d31aa707bed27"
+checksum = "9299338969a3d2f491d65f140b00ddec470858402f888af98e8642fb5e8965cd"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -1383,9 +1366,9 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 
 [[package]]
 name = "primitive-types"
-version = "0.10.1"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05e4722c697a58a99d5d06a08c30821d7c082a4632198de1eaa5a6c22ef42373"
+checksum = "e28720988bff275df1f51b171e1b2a18c30d194c4d2b61defdacecd625a5d94a"
 dependencies = [
  "fixed-hash",
  "impl-codec",
@@ -1444,9 +1427,9 @@ dependencies = [
 
 [[package]]
 name = "radium"
-version = "0.6.2"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "643f8f41a8ebc4c5dc4515c82bb8abd397b527fc20fd681b7c011c2aee5d44fb"
+checksum = "dc33ff2d4973d518d823d61aa239014831e521c75da58e3df4840d3f47749d09"
 
 [[package]]
 name = "rand"
@@ -1767,9 +1750,9 @@ checksum = "f3f6f92acf49d1b98f7a81226834412ada05458b7364277387724a237f062695"
 
 [[package]]
 name = "scale-info"
-version = "1.0.0"
+version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c55b744399c25532d63a0d2789b109df8d46fc93752d46b0782991a931a782f"
+checksum = "c46be926081c9f4dd5dd9b6f1d3e3229f2360bc6502dd8836f84a93b7c75e99a"
 dependencies = [
  "cfg-if",
  "derive_more",
@@ -1779,9 +1762,9 @@ dependencies = [
 
 [[package]]
 name = "scale-info-derive"
-version = "1.0.0"
+version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "baeb2780690380592f86205aa4ee49815feb2acad8c2f59e6dd207148c3f1fcd"
+checksum = "50e334bb10a245e28e5fd755cabcafd96cfcd167c99ae63a46924ca8d8703a3c"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -2514,6 +2497,9 @@ checksum = "c811ca4a8c853ef420abd8592ba53ddbbac90410fab6903b3e79972a631f7680"
 
 [[package]]
 name = "wyz"
-version = "0.2.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85e60b0d1b5f99db2556934e21937020776a5d31520bf169e851ac44e6420214"
+checksum = "30b31594f29d27036c383b53b59ed3476874d518f0efb151b27a4c275141390e"
+dependencies = [
+ "tap",
+]
