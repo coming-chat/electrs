@@ -33,7 +33,7 @@ use {
 };
 
 use light_bitcoin::mast::generate_btc_address;
-use musig2::PublicKey;
+use musig2::key::PublicKey;
 use serde::Serialize;
 use serde_json;
 use std::collections::HashMap;
