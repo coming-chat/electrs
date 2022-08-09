@@ -78,16 +78,16 @@ fn bitcoind_fetcher(
         chan.into_receiver(),
         spawn_thread("bitcoind_fetcher", move || {
             info!("new_headers lens {}", new_headers.len());
-            for entries in new_headers.chunks(1000) {
+            for entries in new_headers.chunks(200) {
                 let blockhashes: Vec<BlockHash> = entries.iter().map(|e| *e.hash()).collect();
                 let blocks = daemon
                     .getblocks(&blockhashes)
                     .expect("failed to get blocks from bitcoind");
                 assert_eq!(blocks.len(), entries.len());
-                if let Some(block) =blocks.last(){
+                if let Some(block) = blocks.last() {
                     match block.bip34_block_height() {
                         Ok(number) => info!("get block number: {}", number),
-                        Err(_) => info!("block hash: {}", block.header.block_hash())
+                        Err(_) => info!("block hash: {}", block.header.block_hash()),
                     };
                 }
                 let block_entries: Vec<BlockEntry> = blocks
