@@ -29,6 +29,13 @@ spec:
             - name: monitor
               containerPort: 4224
               protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: http
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
           envFrom:
             - configMapRef:
                 name: $APP_NAME_MAINNET-env

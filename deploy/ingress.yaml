@@ -3,6 +3,8 @@ apiVersion: networking.k8s.io/v1
 metadata:
   name: $HOST_NAME
   namespace: $NAME_SPACE
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
 # remove global accelerator
 #  annotations:
 #    external-dns.alpha.kubernetes.io/target: a5d156c18cea5820c.awsglobalaccelerator.com
@@ -12,7 +14,7 @@ spec:
     - host: $HOST_NAME
       http:
         paths:
-          - path: /signet
+          - path: /signet/(.*)
             pathType: ImplementationSpecific
             backend:
               service:
@@ -20,7 +22,7 @@ spec:
                 port:
                   number: 3003
 
-          - path: /mainnet
+          - path: /mainnet/(.*)
             pathType: ImplementationSpecific
             backend:
               service:
