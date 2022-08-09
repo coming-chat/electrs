@@ -41,7 +41,7 @@ spec:
                 name: $APP_NAME_MAINNET-env
           resources:
             limits:
-              cpu: 500m
+              cpu: '1.5'
               memory: 4Gi
             requests:
               cpu: 500m
