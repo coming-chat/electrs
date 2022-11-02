@@ -11,6 +11,7 @@ use crate::util::{
 #[cfg(not(feature = "liquid"))]
 use {bitcoin::consensus::encode, std::str::FromStr};
 
+use bitcoin::blockdata::opcodes;
 use bitcoin::hashes::hex::{FromHex, ToHex};
 use bitcoin::hashes::Error as HashError;
 use hex::{self, FromHexError};
@@ -172,8 +173,8 @@ impl TransactionValue {
             locktime: tx.lock_time,
             vin: vins,
             vout: vouts,
-            size: tx.get_size() as u32,
-            weight: tx.get_weight() as u32,
+            size: tx.size() as u32,
+            weight: tx.weight() as u32,
             fee,
             status: Some(TransactionStatus::from(blockid)),
         }
@@ -363,17 +364,10 @@ impl TxOutValue {
         }
     }
 }
-
-#[cfg(not(feature = "liquid"))]
 fn is_v1_p2tr(script: &Script) -> bool {
-    use bitcoin::blockdata::opcodes;
     script.len() == 34
         && script[0] == opcodes::all::OP_PUSHNUM_1.into_u8()
         && script[1] == opcodes::all::OP_PUSHBYTES_32.into_u8()
-}
-#[cfg(feature = "liquid")]
-fn is_v1_p2tr(_script: &Script) -> bool {
-    false
 }
 
 #[derive(Serialize)]
@@ -463,9 +457,9 @@ impl From<Utxo> for UtxoValue {
             surjection_proof: utxo
                 .witness
                 .surjection_proof
-                .map_or(vec![], |p| p.serialize()),
+                .map_or(vec![], |p| (*p).serialize()),
             #[cfg(feature = "liquid")]
-            range_proof: utxo.witness.rangeproof.map_or(vec![], |p| p.serialize()),
+            range_proof: utxo.witness.rangeproof.map_or(vec![], |p| (*p).serialize()),
         }
     }
 }
