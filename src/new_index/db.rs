@@ -196,6 +196,14 @@ impl DB {
         self.db.get(key).unwrap().map(|v| v.to_vec())
     }
 
+    pub fn multi_get(&self, keys: Vec<Bytes>) -> Vec<Option<Bytes>> {
+        self.db
+            .multi_get(keys.iter())
+            .into_iter()
+            .map(|v| v.unwrap().map(|v1| v1.to_vec()))
+            .collect()
+    }
+
     fn verify_compatibility(&self, config: &Config) {
         let mut compatibility_bytes = bincode::serialize(&DB_VERSION).unwrap();
 

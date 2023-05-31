@@ -397,7 +397,12 @@ impl Daemon {
         loop {
             match self.handle_request_batch(method, params_list) {
                 Err(Error(ErrorKind::Connection(msg), _)) => {
-                    warn!("reconnecting to bitcoind: {} {:?} {}", method, params_list.len(), msg);
+                    warn!(
+                        "reconnecting to bitcoind: {} {:?} {}",
+                        method,
+                        params_list.len(),
+                        msg
+                    );
                     self.signal.wait(Duration::from_secs(3), false)?;
                     let mut conn = self.conn.lock().unwrap();
                     *conn = conn.reconnect()?;

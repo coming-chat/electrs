@@ -25,7 +25,8 @@ const CONF_TARGETS: [u16; 28] = [
 ];
 
 pub struct Query {
-    chain: Arc<ChainQuery>, // TODO: should be used as read-only
+    chain: Arc<ChainQuery>,
+    // TODO: should be used as read-only
     mempool: Arc<RwLock<Mempool>>,
     daemon: Arc<Daemon>,
     config: Arc<Config>,
@@ -111,6 +112,16 @@ impl Query {
         self.chain
             .lookup_txn(txid, None)
             .or_else(|| self.mempool().lookup_txn(txid))
+    }
+    pub fn lookup_txns(&self, txids: Vec<Txid>) -> HashMap<Txid, Option<Transaction>> {
+        let confirmed_tx = self.chain.lookup_txns_map(txids.as_slice());
+        txids
+            .into_iter()
+            .map(|v| match confirmed_tx.get(&v).cloned() {
+                Some(value) => (v, Some(value)),
+                None => (v, self.mempool().lookup_txn(&v)),
+            })
+            .collect()
     }
     pub fn lookup_raw_txn(&self, txid: &Txid) -> Option<Bytes> {
         self.chain

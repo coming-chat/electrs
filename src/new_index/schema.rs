@@ -191,7 +191,8 @@ impl From<&Config> for IndexerConfig {
 }
 
 pub struct ChainQuery {
-    store: Arc<Store>, // TODO: should be used as read-only
+    store: Arc<Store>,
+    // TODO: should be used as read-only
     daemon: Arc<Daemon>,
     light_mode: bool,
     duration: HistogramVec,
@@ -820,6 +821,21 @@ impl ChainQuery {
             .collect::<Result<Vec<Transaction>>>()
     }
 
+    pub fn lookup_txns_map(&self, txids: &[Txid]) -> HashMap<Txid, Transaction> {
+        let keys: Vec<Bytes> = txids.iter().map(|v| TxRow::key(&v[..])).collect();
+        self.store
+            .txstore_db
+            .multi_get(keys)
+            .into_iter()
+            .filter(|v1| v1.is_some())
+            .map(|rawtx| {
+                let txn: Transaction =
+                    deserialize(rawtx.unwrap().as_ref()).expect("failed to parse Transaction");
+                (txn.txid(), txn)
+            })
+            .collect()
+    }
+
     pub fn lookup_txn(&self, txid: &Txid, blockhash: Option<&BlockHash>) -> Option<Transaction> {
         let _timer = self.start_timer("lookup_txn");
         self.lookup_raw_txn(txid, blockhash).map(|rawtx| {
@@ -1377,9 +1393,11 @@ pub struct FundingInfo {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SpendingInfo {
-    pub txid: FullHash, // spending transaction
+    pub txid: FullHash,
+    // spending transaction
     pub vin: u16,
-    pub prev_txid: FullHash, // funding transaction
+    pub prev_txid: FullHash,
+    // funding transaction
     pub prev_vout: u16,
     pub value: Value,
 }
@@ -1417,9 +1435,12 @@ impl TxHistoryInfo {
 
 #[derive(Serialize, Deserialize)]
 pub struct TxHistoryKey {
-    pub code: u8,              // H for script history or I for asset history (elements only)
-    pub hash: FullHash, // either a scripthash (always on bitcoin) or an asset id (elements only)
-    pub confirmed_height: u32, // MUST be serialized as big-endian (for correct scans).
+    pub code: u8,
+    // H for script history or I for asset history (elements only)
+    pub hash: FullHash,
+    // either a scripthash (always on bitcoin) or an asset id (elements only)
+    pub confirmed_height: u32,
+    // MUST be serialized as big-endian (for correct scans).
     pub txinfo: TxHistoryInfo,
 }
 

@@ -54,9 +54,12 @@ const ASSETS_PER_PAGE: usize = 25;
 #[cfg(feature = "liquid")]
 const ASSETS_MAX_PER_PAGE: usize = 100;
 
-const TTL_LONG: u32 = 157_784_630; // ttl for static resources (5 years)
-const TTL_SHORT: u32 = 10; // ttl for volatie resources
-const TTL_MEMPOOL_RECENT: u32 = 5; // ttl for GET /mempool/recent
+const TTL_LONG: u32 = 157_784_630;
+// ttl for static resources (5 years)
+const TTL_SHORT: u32 = 10;
+// ttl for volatie resources
+const TTL_MEMPOOL_RECENT: u32 = 5;
+// ttl for GET /mempool/recent
 const CONF_FINAL: usize = 10; // reorgs deeper than this are considered unlikely
 
 fn pubkey_to_address(pubkey: &str, network: &str) -> Result<String, HttpError> {
@@ -364,6 +367,7 @@ impl TxOutValue {
         }
     }
 }
+
 fn is_v1_p2tr(script: &Script) -> bool {
     script.len() == 34
         && script[0] == opcodes::all::OP_PUSHNUM_1.into_u8()
@@ -412,6 +416,7 @@ struct UtxoValue {
     #[serde(skip_serializing_if = "Vec::is_empty", with = "crate::util::serde_hex")]
     range_proof: Vec<u8>,
 }
+
 impl From<Utxo> for UtxoValue {
     fn from(utxo: Utxo) -> Self {
         UtxoValue {
@@ -474,6 +479,7 @@ struct SpendingValue {
     #[serde(skip_serializing_if = "Option::is_none")]
     status: Option<TransactionStatus>,
 }
+
 impl From<SpendingInput> for SpendingValue {
     fn from(spend: SpendingInput) -> Self {
         SpendingValue {
@@ -484,6 +490,7 @@ impl From<SpendingInput> for SpendingValue {
         }
     }
 }
+
 impl Default for SpendingValue {
     fn default() -> Self {
         SpendingValue {
@@ -953,6 +960,15 @@ fn handle_request(
 
             json_response(tx, ttl)
         }
+        (&Method::POST, Some(&"tx"), None, None, None, None) => {
+            let hashs: Vec<&str> = serde_json::from_slice(body.as_ref())?;
+            let txids: Vec<Txid> = hashs
+                .into_iter()
+                .map(|v| Txid::from_hex(v).unwrap())
+                .collect();
+            let transactions = query.lookup_txns(txids);
+            json_response(transactions, TTL_LONG)
+        }
         (&Method::GET, Some(&"tx"), Some(hash), Some(out_type @ &"hex"), None, None)
         | (&Method::GET, Some(&"tx"), Some(hash), Some(out_type @ &"raw"), None, None) => {
             let hash = Txid::from_hex(hash)?;
@@ -1384,36 +1400,42 @@ impl From<String> for HttpError {
         HttpError(StatusCode::BAD_REQUEST, msg)
     }
 }
+
 impl From<ParseIntError> for HttpError {
     fn from(_e: ParseIntError) -> Self {
         //HttpError::from(e.description().to_string())
         HttpError::from("Invalid number".to_string())
     }
 }
+
 impl From<HashError> for HttpError {
     fn from(_e: HashError) -> Self {
         //HttpError::from(e.description().to_string())
         HttpError::from("Invalid hash string".to_string())
     }
 }
+
 impl From<FromHexError> for HttpError {
     fn from(_e: FromHexError) -> Self {
         //HttpError::from(e.description().to_string())
         HttpError::from("Invalid hex string".to_string())
     }
 }
+
 impl From<bitcoin::hashes::hex::Error> for HttpError {
     fn from(_e: bitcoin::hashes::hex::Error) -> Self {
         //HttpError::from(e.description().to_string())
         HttpError::from("Invalid hex string".to_string())
     }
 }
+
 impl From<bitcoin::util::address::Error> for HttpError {
     fn from(_e: bitcoin::util::address::Error) -> Self {
         //HttpError::from(e.description().to_string())
         HttpError::from("Invalid Bitcoin address".to_string())
     }
 }
+
 impl From<errors::Error> for HttpError {
     fn from(e: errors::Error) -> Self {
         warn!("errors::Error: {:?}", e);
@@ -1425,21 +1447,25 @@ impl From<errors::Error> for HttpError {
         }
     }
 }
+
 impl From<serde_json::Error> for HttpError {
     fn from(e: serde_json::Error) -> Self {
         HttpError::from(e.to_string())
     }
 }
+
 impl From<encode::Error> for HttpError {
     fn from(e: encode::Error) -> Self {
         HttpError::from(e.to_string())
     }
 }
+
 impl From<std::string::FromUtf8Error> for HttpError {
     fn from(e: std::string::FromUtf8Error) -> Self {
         HttpError::from(e.to_string())
     }
 }
+
 #[cfg(feature = "liquid")]
 impl From<address::AddressError> for HttpError {
     fn from(e: address::AddressError) -> Self {
