@@ -212,7 +212,7 @@ impl TxInValue {
     fn new(txin: &TxIn, prevout: Option<&TxOut>, config: &Config) -> Self {
         let witness = &txin.witness;
         #[cfg(feature = "liquid")]
-        let witness = &witness.script_witness;
+            let witness = &witness.script_witness;
 
         let witness = if !witness.is_empty() {
             Some(witness.iter().map(hex::encode).collect())
@@ -292,31 +292,31 @@ struct TxOutValue {
 impl TxOutValue {
     fn new(txout: &TxOut, config: &Config) -> Self {
         #[cfg(not(feature = "liquid"))]
-        let value = txout.value;
+            let value = txout.value;
 
         #[cfg(feature = "liquid")]
-        let value = txout.value.explicit();
+            let value = txout.value.explicit();
         #[cfg(feature = "liquid")]
-        let valuecommitment = match txout.value {
+            let valuecommitment = match txout.value {
             Value::Confidential(..) => Some(hex::encode(encode::serialize(&txout.value))),
             _ => None,
         };
 
         #[cfg(feature = "liquid")]
-        let asset = match txout.asset {
+            let asset = match txout.asset {
             Asset::Explicit(value) => Some(value.to_hex()),
             _ => None,
         };
         #[cfg(feature = "liquid")]
-        let assetcommitment = match txout.asset {
+            let assetcommitment = match txout.asset {
             Asset::Confidential(..) => Some(hex::encode(encode::serialize(&txout.asset))),
             _ => None,
         };
 
         #[cfg(not(feature = "liquid"))]
-        let is_fee = false;
+            let is_fee = false;
         #[cfg(feature = "liquid")]
-        let is_fee = txout.is_fee();
+            let is_fee = txout.is_fee();
 
         let script = &txout.script_pubkey;
         let script_asm = script.to_asm();
@@ -348,7 +348,7 @@ impl TxOutValue {
         };
 
         #[cfg(feature = "liquid")]
-        let pegout = PegoutValue::from_txout(txout, config.network_type, config.parent_network);
+            let pegout = PegoutValue::from_txout(txout, config.network_type, config.parent_network);
 
         TxOutValue {
             scriptpubkey: script.clone(),
@@ -962,12 +962,27 @@ fn handle_request(
         }
         (&Method::POST, Some(&"tx"), None, None, None, None) => {
             let hashs: Vec<&str> = serde_json::from_slice(body.as_ref())?;
+            if hashs.len() > 50 {
+                HttpError::from("query txs should less than 50".to_owned());
+            }
             let txids: Vec<Txid> = hashs
                 .into_iter()
                 .map(|v| Txid::from_hex(v).unwrap())
                 .collect();
             let transactions = query.lookup_txns(txids);
-            json_response(transactions, TTL_LONG)
+            let txs: HashMap<Txid, Option<TransactionValue>> = transactions.into_iter().map(|(k, v)| {
+                match v {
+                    None => {
+                        (k, None)
+                    }
+                    Some(transaction) => {
+                        let blockid = query.chain().tx_confirming_block(&k);
+                        let tx = prepare_txs(vec![(transaction, blockid)], query, config).remove(0);
+                        (k, Some(tx))
+                    }
+                }
+            }).collect();
+            json_response(txs, TTL_LONG)
         }
         (&Method::GET, Some(&"tx"), Some(hash), Some(out_type @ &"hex"), None, None)
         | (&Method::GET, Some(&"tx"), Some(hash), Some(out_type @ &"raw"), None, None) => {
@@ -1278,8 +1293,8 @@ fn handle_request(
 }
 
 fn http_message<T>(status: StatusCode, message: T, ttl: u32) -> Result<Response<Body>, HttpError>
-where
-    T: Into<Body>,
+    where
+        T: Into<Body>,
 {
     Ok(Response::builder()
         .status(status)
@@ -1322,7 +1337,7 @@ fn blocks(
         current_hash = blockhm.header_entry.header().prev_blockhash;
 
         #[allow(unused_mut)]
-        let mut value = BlockValue::new(blockhm, config.network_type);
+            let mut value = BlockValue::new(blockhm, config.network_type);
 
         #[cfg(feature = "liquid")]
         {
@@ -1352,23 +1367,23 @@ fn to_scripthash(
 
 fn address_to_scripthash(addr: &str, network: Network) -> Result<FullHash, HttpError> {
     #[cfg(not(feature = "liquid"))]
-    let addr = address::Address::from_str(addr)?;
+        let addr = address::Address::from_str(addr)?;
     #[cfg(feature = "liquid")]
-    let addr = address::Address::parse_with_params(addr, network.address_params())?;
+        let addr = address::Address::parse_with_params(addr, network.address_params())?;
 
     #[cfg(not(feature = "liquid"))]
-    let is_expected_net = {
+        let is_expected_net = {
         let addr_network = Network::from(addr.network);
 
         // Testnet, Regtest and Signet all share the same version bytes,
         // `addr_network` will be detected as Testnet for all of them.
         addr_network == network
             || (addr_network == Network::Testnet
-                && matches!(network, Network::Regtest | Network::Signet))
+            && matches!(network, Network::Regtest | Network::Signet))
     };
 
     #[cfg(feature = "liquid")]
-    let is_expected_net = addr.params == network.address_params();
+        let is_expected_net = addr.params == network.address_params();
 
     if !is_expected_net {
         bail!(HttpError::from("Address on invalid network".to_string()))
