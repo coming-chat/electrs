@@ -10,6 +10,7 @@ use std::collections::{BTreeSet, HashMap, HashSet};
 use std::iter::FromIterator;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
+use light_bitcoin::mast::taggedhash::HashAdd;
 
 use crate::chain::{deserialize, Network, OutPoint, Transaction, TxOut, Txid};
 use crate::config::Config;
@@ -34,14 +35,19 @@ pub struct Mempool {
     config: Arc<Config>,
     txstore: HashMap<Txid, Transaction>,
     feeinfo: HashMap<Txid, TxFeeInfo>,
-    history: HashMap<FullHash, Vec<TxHistoryInfo>>, // ScriptHash -> {history_entries}
-    edges: HashMap<OutPoint, (Txid, u32)>,          // OutPoint -> (spending_txid, spending_vin)
-    recent: ArrayDeque<[TxOverview; RECENT_TXS_SIZE], Wrapping>, // The N most recent txs to enter the mempool
+    history: HashMap<FullHash, Vec<TxHistoryInfo>>,
+    // ScriptHash -> {history_entries}
+    edges: HashMap<OutPoint, (Txid, u32)>,
+    // OutPoint -> (spending_txid, spending_vin)
+    recent: ArrayDeque<[TxOverview; RECENT_TXS_SIZE], Wrapping>,
+    // The N most recent txs to enter the mempool
     backlog_stats: (BacklogStats, Instant),
 
     // monitoring
-    latency: HistogramVec, // mempool requests latency
-    delta: HistogramVec,   // # of added/removed txs
+    latency: HistogramVec,
+    // mempool requests latency
+    delta: HistogramVec,
+    // # of added/removed txs
     count: GaugeVec,       // current state of the mempool
 
     // elements only
@@ -180,7 +186,7 @@ impl Mempool {
                 TxHistoryInfo::Funding(info) => {
                     // Liquid requires some additional information from the txo that's not available in the TxHistoryInfo index.
                     #[cfg(feature = "liquid")]
-                    let txo = self
+                        let txo = self
                         .lookup_txo(&entry.get_funded_outpoint())
                         .expect("missing txo");
 
@@ -286,13 +292,18 @@ impl Mempool {
 
         // Download and add new transactions from bitcoind's mempool
         let txids: Vec<&Txid> = new_txids.difference(&old_txids).collect();
-        let to_add = match daemon.gettransactions(&txids) {
-            Ok(txs) => txs,
-            Err(err) => {
-                warn!("failed to get {} transactions: {}", txids.len(), err); // e.g. new block or RBF
-                return Ok(()); // keep the mempool until next update()
-            }
-        };
+        let mut to_add: Vec<Transaction> = vec![];
+        for sub_txids in txids.chunks(500000) {
+            let mut to_add_sub = match daemon.gettransactions(&sub_txids) {
+                Ok(txs) => txs,
+                Err(err) => {
+                    warn!("failed to get {} transactions: {}", txids.len(), err); // e.g. new block or RBF
+                    return Ok(()); // keep the mempool until next update()
+                }
+            };
+            to_add.append(&mut to_add_sub)
+        }
+
         // Add new transactions
         info!("Add new transactions");
         self.add(to_add);
@@ -520,8 +531,10 @@ impl Mempool {
 #[derive(Serialize)]
 pub struct BacklogStats {
     pub count: u32,
-    pub vsize: u32,     // in virtual bytes (= weight/4)
-    pub total_fee: u64, // in satoshis
+    pub vsize: u32,
+    // in virtual bytes (= weight/4)
+    pub total_fee: u64,
+    // in satoshis
     pub fee_histogram: Vec<(f32, u32)>,
 }
 
