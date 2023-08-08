@@ -1,0 +1,103 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: $APP_NAME_TESTNET
+  namespace: backend-pre
+  labels:
+    app: $APP_NAME_TESTNET
+spec:
+  replicas: $REPLICAS
+  selector:
+    matchLabels:
+      app: $APP_NAME_TESTNET
+  template:
+    metadata:
+      labels:
+        app: $APP_NAME_TESTNET
+    spec:
+      volumes:
+        - name: timezone
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+      containers:
+        - name: $APP_NAME_TESTNET
+          image: $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:$TAG_NAME-$BUILD_NUMBER
+          ports:
+            - name: http
+              containerPort: 3003
+              protocol: TCP
+            - name: monitor
+              containerPort: 4224
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: http
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          envFrom:
+            - configMapRef:
+                name: $APP_NAME_TESTNET-env
+          resources:
+            limits:
+              cpu: 500m
+              memory: 4Gi
+            requests:
+              cpu: 500m
+              memory: 2Gi
+          volumeMounts:
+            - name: timezone
+              mountPath: /etc/localtime
+            - name: data
+              mountPath: /code/db
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: default
+      securityContext: {}
+      imagePullSecrets:
+        - name: comingweb3-registry-secret
+      affinity: {}
+      schedulerName: default-scheduler
+  volumeClaimTemplates:
+    - kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: data
+        labels:
+          app: $APP_NAME_TESTNET
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        volumeMode: Filesystem
+  revisionHistoryLimit: 10
+  serviceName: $APP_NAME_TESTNET-svc
+  podManagementPolicy: OrderedReady
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: $APP_NAME_TESTNET-svc
+  namespace: backend-pre
+  labels:
+    app: $APP_NAME_TESTNET-svc
+spec:
+  ports:
+    - port: 3003
+      name: http
+      targetPort: http
+    - port: 4224
+      name: monitor
+      targetPort: monitor
+  selector:
+    app: $APP_NAME_TESTNET
+  type: ClusterIP
+
+
+
