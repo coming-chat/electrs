@@ -12,7 +12,7 @@ pipeline {
     TAG_NAME = sh (returnStdout: true, script: "echo $BRANCH_NAME | sed 's@/@-@g'").trim()
     APP_NAME = 'electrs'
     APP_NAME_SIGNET = 'electrs-signet'
-    APP_NAME_SIGNET = 'electrs-testnet'
+    APP_NAME_TESTNET = 'electrs-testnet'
     APP_NAME_MAINNET = 'electrs-mainnet'
     NAME_SPACE = 'backend-prod'
     REPLICAS = 1
@@ -55,7 +55,7 @@ pipeline {
               {
                 sh 'envsubst <  deploy/deploy-electrs-mainnet.yaml | kubectl apply -f -'
                 sh 'envsubst <  deploy/deploy-electrs-signet.yaml | kubectl apply -f -'
-                sh 'envsubst <  deploy/deploy-electrs-testnet.yaml | kubectl apply -f -'
+//                 sh 'envsubst <  deploy/deploy-electrs-testnet.yaml | kubectl apply -f -'
                 sh 'envsubst <  deploy/ingress.yaml | kubectl apply -f -'
               }
             }
