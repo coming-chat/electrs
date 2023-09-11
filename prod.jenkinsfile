@@ -1,7 +1,7 @@
 pipeline {
   agent {
     node {
-      label 'base-arm64'
+      label 'base'
     }
   }
   environment {
@@ -54,8 +54,8 @@ pipeline {
                 variable: 'KUBECONFIG')
               ])
               {
-                //sh 'envsubst <  deploy/deploy-electrs-mainnet.yaml | kubectl apply -f -'
-                //sh 'envsubst <  deploy/deploy-electrs-signet.yaml | kubectl apply -f -'
+                sh 'envsubst <  deploy/deploy-electrs-mainnet.yaml | kubectl apply -f -'
+                sh 'envsubst <  deploy/deploy-electrs-signet.yaml | kubectl apply -f -'
                 sh 'envsubst <  deploy/deploy-electrs-testnet.yaml | kubectl apply -f -'
                 sh 'envsubst <  deploy/ingress.yaml | kubectl apply -f -'
               }
