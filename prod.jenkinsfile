@@ -1,7 +1,7 @@
 pipeline {
   agent {
     node {
-      label 'base && arm64'
+      label 'arm64'
     }
   }
   environment {
