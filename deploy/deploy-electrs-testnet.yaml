@@ -57,6 +57,13 @@ spec:
       dnsPolicy: ClusterFirst
       serviceAccountName: default
       securityContext: {}
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      tolerations:
+        - key: "kubernetes.io/arch"
+          value: "arm64"
+          operator: "Equal"
+          effect: "NoSchedule"
       imagePullSecrets:
         - name: comingweb3-registry-secret
       affinity: {}
