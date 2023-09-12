@@ -35,7 +35,7 @@ pipeline {
           withCredentials([usernamePassword(credentialsId : "$DOCKER_CREDENTIAL_ID" ,passwordVariable : 'DOCKER_PASSWORD' ,usernameVariable : 'DOCKER_USERNAME' ,)]) {
             sh 'docker buildx create --name mul_builder --bootstrap --use'
             sh 'echo "$DOCKER_PASSWORD" | docker login $REGISTRY -u "$DOCKER_USERNAME" --password-stdin'
-            sh 'docker buildx build --platform=linux/amd64,linux/arm64 -f Dockerfile -t $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:$TAG_NAME-$BUILD_NUMBER --push .'
+            sh 'docker buildx build --platform=linux/arm64 -f Dockerfile -t $REGISTRY/$DOCKERHUB_NAMESPACE/$APP_NAME:$TAG_NAME-$BUILD_NUMBER --push .'
           }
 
         }
