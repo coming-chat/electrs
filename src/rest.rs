@@ -23,7 +23,7 @@ use light_bitcoin::serialization::{serialize_with_flags, SERIALIZE_TRANSACTION_W
 use tokio::sync::oneshot;
 
 use hyperlocal::UnixServerExt;
-use std::fs;
+use std::{cmp, fs};
 #[cfg(feature = "liquid")]
 use {
     crate::elements::{peg::PegoutValue, AssetSorting, IssuanceValue},
@@ -939,7 +939,8 @@ fn handle_request(
                     .ok_or_else(|| HttpError::not_found("Transaction not found".to_string()))?;
                 utxo.rawtx = String::from(hex::encode(rawtx));
             }
-            json_response(utxos, TTL_SHORT)
+            utxos.sort_by(|a, b| b.value.cmp(&a.value));
+            json_response(&utxos[..cmp::min(1000, utxos.len())], TTL_SHORT)
         }
         (&Method::GET, Some(&"address-prefix"), Some(prefix), None, None, None) => {
             if !config.address_search {
