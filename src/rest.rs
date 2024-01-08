@@ -928,6 +928,15 @@ fn handle_request(
             None,
             None,
         ) => {
+            let order = query_params.get("order").cloned();
+            let limit = match query_params.get("limit").cloned() {
+                Some(limit) => {
+                    limit.parse().unwrap()
+                }
+                None => {
+                    config.utxos_limit
+                }
+            };
             let script_hash = to_scripthash(script_type, script_str, config.network_type)?;
             let mut utxos: Vec<UtxoValue> = query
                 .utxo(&script_hash[..])?
@@ -942,8 +951,22 @@ fn handle_request(
                     .ok_or_else(|| HttpError::not_found("Transaction not found".to_string()))?;
                 utxo.rawtx = String::from(hex::encode(rawtx));
             }
-            utxos.sort_by(|a, b| b.value.cmp(&a.value));
-            json_response(&utxos[..cmp::min(1000, utxos.len())], TTL_SHORT)
+            match order {
+                None => {}
+                Some(ord) => {
+                    match ord.as_str() {
+                        "DESC" => {
+                            utxos.sort_by(|a, b| b.value.cmp(&a.value));
+                        }
+                        "ASC" => {
+                            utxos.sort_by(|a, b| a.value.cmp(&b.value));
+                        }
+                        _ => {}
+                    }
+                }
+            }
+
+            json_response(&utxos[..cmp::min(limit, utxos.len())], TTL_SHORT)
         }
         (&Method::GET, Some(&"address-prefix"), Some(prefix), None, None, None) => {
             if !config.address_search {
