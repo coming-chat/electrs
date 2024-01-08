@@ -46,6 +46,7 @@ use std::sync::Arc;
 use std::thread;
 use hyper::body::HttpBody;
 use url::form_urlencoded;
+use url::form_urlencoded::parse;
 
 const CHAIN_TXS_PER_PAGE: usize = 25;
 const MAX_MEMPOOL_TXS: usize = 50;
@@ -929,14 +930,11 @@ fn handle_request(
             None,
         ) => {
             let order = query_params.get("order").cloned();
-            let limit = match query_params.get("limit").cloned() {
-                Some(limit) => {
-                    limit.parse().unwrap()
-                }
-                None => {
-                    config.utxos_limit
-                }
-            };
+            let limit = query_params.get("limit").cloned().
+                map_or_else(
+                    ||Ok(config.utxos_limit),
+                    |l| l.parse()
+                )?;
             let script_hash = to_scripthash(script_type, script_str, config.network_type)?;
             let mut utxos: Vec<UtxoValue> = query
                 .utxo(&script_hash[..])?
