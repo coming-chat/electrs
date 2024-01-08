@@ -13,6 +13,8 @@ use {bitcoin::consensus::encode, std::str::FromStr};
 
 use bitcoin::blockdata::opcodes;
 use bitcoin::hashes::hex::{FromHex, ToHex};
+use bitcoin::consensus::encode::{deserialize, serialize};
+use bitcoin::util::psbt::PartiallySignedTransaction;
 use bitcoin::hashes::Error as HashError;
 use hex::{self, FromHexError};
 use hyper::service::{make_service_fn, service_fn};
@@ -42,6 +44,7 @@ use std::num::ParseIntError;
 use std::os::unix::fs::FileTypeExt;
 use std::sync::Arc;
 use std::thread;
+use hyper::body::HttpBody;
 use url::form_urlencoded;
 
 const CHAIN_TXS_PER_PAGE: usize = 25;
@@ -1090,6 +1093,16 @@ fn handle_request(
             };
             let txid = query
                 .broadcast_raw(&txhex)
+                .map_err(|err| HttpError::from(err.description().to_string()))?;
+            http_message(StatusCode::OK, txid.to_hex(), 0)
+        }
+
+        (&Method::POST, Some(&"psbt"), None, None, None, None) => {
+            let tx: PartiallySignedTransaction = deserialize(&hex::decode(body.to_vec())?)?;
+            let tx: bitcoin::Transaction = tx.clone().extract_tx();
+
+            let txid = query
+                .broadcast_raw(hex::encode(serialize(&tx)).as_str())
                 .map_err(|err| HttpError::from(err.description().to_string()))?;
             http_message(StatusCode::OK, txid.to_hex(), 0)
         }
