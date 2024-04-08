@@ -930,6 +930,10 @@ fn handle_request(
             None,
         ) => {
             let order = query_params.get("order").cloned();
+            let min_utxo_value: u64 = query_params.get("minValue").cloned().map_or_else(
+                ||Ok(0),
+                |v| v.parse()
+            )?;
             let limit = query_params.get("limit").cloned().
                 map_or_else(
                     ||Ok(config.utxos_limit),
@@ -940,6 +944,7 @@ fn handle_request(
                 .utxo(&script_hash[..])?
                 .into_iter()
                 .map(UtxoValue::from)
+                .filter(|item| item.value >= min_utxo_value)
                 .collect();
             // XXX paging?
             for utxo in utxos.iter_mut() {
